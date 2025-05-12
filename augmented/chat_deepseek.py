@@ -1,25 +1,42 @@
-from openai import OpenAI
+import asyncio
 import os
+from mcp import Tool
+
+# 使用异步的OpenAI客户端
+from openai import AsyncOpenAI
+
+# 使用dataclasss来定义数据类
+from dataclasses import dataclass, field
+
+from openai.types import FunctionDefinition
+from openai.types.chat import (
+    ChatCompletionMessageParam,
+    ChatCompletionToolParam,
+)
 import dotenv
+from pydantic import BaseModel
+from rich import print as rprint
+
+from augmented.utils import pretty
 
 dotenv.load_dotenv()  # 加载环境变量
 
-# 可以直接明文写key和url，也可以通过设置全局系统变量来设置
-# 但我这里选择使用python-dotenv，通过加载.env文件来设置 key和url
-client = OpenAI(
-    api_key=os.getenv("DEEPSEEK_API_KEY"), base_url=os.getenv("DEEPSEEL_BASE_URL")
-)
 
-response = client.chat.completions.create(
-    model="deepseek-chat",
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": "hello"},
-    ],
-    stream=True,
-)
+@dataclass
+class AsyncChat:
+    model: str
+    messages: list[ChatCompletionMessageParam] = field(default_factory=list)
+    tools: list[Tool] = field(default_factory=list)
 
-# 遍历流式响应的数据块
-for chunk in response:
-    if chunk.choices[0].delta.content is not None:
-        print(chunk.choices[0].delta.content, end="", flush=True)  # 实时输出内容
+    system_promprt: str = "You are a helpful assistant."
+    context: str = ""
+
+    llm: AsyncOpenAI = field(init=False)
+
+    # 初始化之后自动被调用
+    def __post_init__(self):
+        # 创建异步的OpenAI客户端
+        self.llm = AsyncOpenAI(
+            api_key=os.environ.get("DEEPSEEK_API_KEY"),
+            base_url=os.environ.get("DEEPSEEK_BASE_URL"),
+        )
