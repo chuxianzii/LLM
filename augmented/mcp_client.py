@@ -88,7 +88,7 @@ async def example():
         ),
         (
             "fetch",
-            ["npx", "-y", "@modelcontextprotocol/server-fetch"],
+            ["python", "-m", "mcp_server_fetch"],
         ),
     ]:
         log_title(mcp_name)
