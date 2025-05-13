@@ -8,7 +8,10 @@ help:
     @echo "`just -l`"
 
 run_pretty:
-    python augmented/utils/pretty.py
+    python -m augmented.utils.pretty.py
 
 run_chat_deepseek:
-    python augmented/chat_deepseek.py
+    python -m augmented.chat_deepseek.py
+
+run_mcp_client:
+    python -m augmented.mcp_client
